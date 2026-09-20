@@ -1,271 +1,289 @@
-# Enverus Technical Case Study: RAG Chatbot
+# Agent-as-a-Judge RAG — Enverus Technical Case Study
 
-## Project Overview
-This repository contains a production-grade, locally deployable Retrieval-Augmented Generation (RAG) system built for the **Enverus Product Intern — Machine Learning & Gen-AI** case study.
+A locally deployable Retrieval-Augmented Generation system that answers questions about the paper **"Agent-as-a-Judge: Evaluate Agents with Agents"** ([arXiv:2410.10934](https://arxiv.org/abs/2410.10934)) and cites the exact page, section, and chunk each answer came from.
 
-The system is designed to ingest, index, retrieve, and answer complex research queries about the seminal AI evaluation paper:
-> **"Agent-as-a-Judge: Evaluate Agents with Agents"**  
-> *Mingchen Zhuge, Changsheng Liu, Haozhe Liu, Jiaxuan You, et al. (October 2024)*  
-> [arXiv:2410.10934](https://arxiv.org/abs/2410.10934)
+The design goal was not "get the LLM to answer." It was: **answer only when the retrieved evidence actually supports an answer, and abstain when it doesn't.** A deterministic safety layer sits between retrieval and generation, and again between generation and output.
 
-The pipeline enables verifiable, source-grounded question answering over the paper's 44 pages, methodology, empirical findings, and complex benchmark tables, accompanied by explicit source chunk citations, page numbers, and cosine similarity scores.
+Runs entirely on a local machine. No API keys, no external calls at inference time.
 
 ---
 
-## Assignment Objective & Principles
-- **Lean & Modular Architecture:** Implemented with pure Python, PyMuPDF, Sentence-Transformers, ChromaDB, and Ollama without cumbersome orchestration frameworks (no LangChain / LlamaIndex overhead).
-- **Strict Source Grounding:** Enforces a 10-point anti-hallucination prompt contract and a deterministic pre/post-generation Safety Layer (`src/safety.py`) to eliminate extrapolation.
-- **Table-Context & Numerical Integrity:** Resolves nuanced table collisions (e.g. Table 1 developer costs vs Table 2/3 metrics) and verifies all numerical claims against retrieved evidence.
-- **100% Local & Private Execution:** Operates entirely locally using open-weights embedding models (`all-MiniLM-L6-v2`) and a local SLM (`qwen2.5:1.5b` via Ollama) without external API costs or external telemetry.
-- **Full Traceability:** Every response preserves full citation provenance (Chunk ID, 1-indexed page number, section title, and cosine similarity score).
+## At a Glance
+
+| | |
+| :--- | :--- |
+| Corpus | 1 paper, 44 pages → 134 structure-aware chunks |
+| Embeddings | `all-MiniLM-L6-v2`, 384-dim, L2-normalized |
+| Vector store | ChromaDB, cosine (HNSW), persistent |
+| Generation | `qwen2.5:1.5b` via Ollama, `temperature=0.0` |
+| Retrieval (12-query eval set) | Top-1 **50.0%** · Top-3 **75.0%** · Top-5 **83.3%** |
+| Benchmark | 12/12 questions grounded; 3 correctly abstained |
+| Tests | 98 passing (`pytest`) |
+| Dependencies | Pure Python + PyMuPDF + Sentence-Transformers + ChromaDB. No LangChain / LlamaIndex. |
 
 ---
 
-## System Architecture & Workflow
+## Quickstart
 
-The pipeline decouples **Offline Document Ingestion & Indexing** from **Online Grounded Retrieval & Generation**:
-
-![RAG Architecture](visualization/rag_workflow.png)
-
-*(A standalone architecture diagram is located in [`visualization/rag_workflow.png`](visualization/rag_workflow.png) with detailed notes in [`visualization/README.md`](visualization/README.md).)*
-
-```
-[ Research Paper PDF (44 pages) ]
-              │
-              ▼
-[ Page Extraction: PyMuPDF (src/ingest.py) ]
-              │
-              ▼
-[ Structure-Aware Chunking (src/chunking.py) ] ──▶ 134 Chunks with Headings & Tables
-              │
-              ▼
-[ Dense Embeddings: all-MiniLM-L6-v2 (src/embeddings.py) ] ──▶ 384-dim Vectors (L2 norm)
-              │
-              ▼
-[ Vector Store: ChromaDB (src/vector_store.py) ] ──▶ Collection: agent_as_a_judge
-              ▲
-              │ Cosine Nearest-Neighbor Search
-              │
-[ User Query ] ──▶ [ Dense Semantic Retrieval (src/retriever.py) ]
-                          │
-                          ▼
-            [ Top-5 Retrieved Evidence Chunks ]
-                          │
-                          ▼
-            [ Deterministic Safety Layer (src/safety.py) ]
-              ├─ Pre-Gen Entity Sufficiency Check (e.g., Task 51 R1)
-              ├─ Table-Context & Semantic Disambiguation (Table 2 vs 3)
-              └─ Setting Conflation & Numerical Safety Audit
-                          │
-                          ▼
-            [ Local LLM Generator: Qwen 2.5 1.5B (src/generator.py via Ollama) ]
-                          │
-                          ▼
-            [ Validated Grounded Answer + Source Citations (RAGResponse) ]
-```
-
----
-
-## Core Pipeline Components
-
-### 1. PDF Ingestion (`src/ingest.py`)
-- Extracts full-text content page-by-page from `data/agent_as_a_judge.pdf` using PyMuPDF (`fitz`).
-- Preserves exact 1-indexed document page boundaries into `PageRecord` objects.
-- Handles edge cases including empty pages, file validation, and page count verification (44 pages total).
-
-### 2. Structure-Aware Chunking (`src/chunking.py`)
-- Transforms 44 page records into 134 semantically coherent `Chunk` objects.
-- Preserves section hierarchies (`1 Introduction`, `2 DevAI...`, `3 Human-as-a-Judge...`, `Appendix A-K`).
-- Identifies and retains Markdown tabular structures intact (e.g. Table 1, Table 2, Table 3, Table 4, Table 6).
-- Formats deterministic identifiers (`chunk_p{page}_{index}`).
-
-### 3. Dense Embedding Module (`src/embeddings.py`)
-- Employs `sentence-transformers/all-MiniLM-L6-v2` locally to map text into 384-dimensional dense vectors.
-- Applies unit-length L2 normalization to ensure that inner product matches cosine similarity.
-- Supports batch embedding for efficient indexing.
-
-### 4. ChromaDB Vector Store (`src/vector_store.py`)
-- Manages a persistent local ChromaDB database in `chroma_db/`.
-- Collection: `agent_as_a_judge` with `{"hnsw:space": "cosine"}` metric.
-- Idempotent upserts prevent duplicate entries on re-indexing.
-
-### 5. Dense Semantic Retriever (`src/retriever.py`)
-- Validates query input and computes 384-dimensional query embedding.
-- Queries ChromaDB using HNSW nearest-neighbor search to retrieve top-$k$ evidence chunks.
-- Computes cosine similarity score: $s = 1.0 - \text{distance} \in [-1, 1]$.
-- Returns structured `RetrievalResult` objects preserving rank, chunk ID, page number, section, and text.
-
-### 6. Local LLM Generator (`src/generator.py`)
-- Connects to local Ollama daemon via HTTP (`http://localhost:11434/api/generate`).
-- Model: `qwen2.5:1.5b` with `temperature: 0.0` for deterministic factual generation.
-- Enforces a 10-point system prompt contract forbidding extrapolation, outside knowledge, or fabricated figures.
-
-### 7. Grounding, Numerical Safety & Table Disambiguation (`src/safety.py`)
-A deterministic guardrail layer operating both pre- and post-generation:
-- **Entity Sufficiency Check:** Checks if specific requested entities/identifiers (e.g., `Task 51`, `Requirement R1`) exist in the evidence. If missing, immediately halts generation (0.0s latency) with the canonical fallback:
-  > *"The provided evidence is insufficient to answer this question."*
-- **Table-Context Disambiguation:** Detects queries asking generally for benchmark results/metrics when retrieved evidence spans conflicting tables (e.g., Table 2 developer baselines vs Table 3 AI Judge evaluations), preventing incorrect metric substitution.
-- **Setting Conflation Check:** Detects sentences presenting numbers across multiple evaluation settings (e.g. `gray-box` and `black-box`) without explicit 1:1 attribution, blocking arbitrary number guessing.
-- **Numerical Hallucination Audit:** Extracts all percentages and numbers from candidate answers and verifies that each figure is explicitly supported in the retrieved text.
-
-### 8. Application Interface Status
-- **Implemented Interfaces:**
-  - **Programmatic Python API:** [`get_rag_pipeline()`](src/rag_pipeline.py) provides full `answer(question, top_k)` capabilities.
-  - **CLI Real RAG Runner:** [`test_real_rag.py`](test_real_rag.py) runs representative test queries against the live pipeline.
-  - **Automated Benchmark Runner:** [`evaluate_question_bank.py`](evaluate_question_bank.py) executes the full 12-question assignment bank.
-- *Streamlit UI Note:* In accordance with the assignment's modular requirements, an interactive graphical Streamlit UI was not implemented to keep dependencies minimal, clean, and focused on core pipeline reproducibility and grounding.
-
----
-
-## Authoritative 12-Question Benchmark Results
-
-All 12 assignment questions have been evaluated against the authoritative source paper:
-
-| ID | Query Concept | Target Context | Evidence Status | Grounding Status | Safety Layer |
-| :-: | :--- | :--- | :---: | :---: | :---: |
-| **Q01** | DevAI Dataset Statistics | DevAI Dataset Baseline | SUFFICIENT | GROUNDED | PASS |
-| **Q02** | Agent-as-a-Judge Savings | Human vs Agent-as-a-Judge | SUFFICIENT | GROUNDED | PASS |
-| **Q03** | Three Agentic Frameworks | AI Developer Baselines | SUFFICIENT | GROUNDED | PASS |
-| **Q04** | Average Cost & Time | Table 1 Developer Statistics | SUFFICIENT | GROUNDED | **PASS** *(Table 1 cost/time)* |
-| **Q05** | Requirements Met & Solve Rate | Table 2 Baselines vs Table 3 Judges | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(Table 2 absent, Table 3 blocked)* |
-| **Q06** | OpenHands Black-Box Alignment | Table 3 AI Judges | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(Conflated settings)* |
-| **Q07** | Component Ablations | Table 4 / Section 4.3 | SUFFICIENT | GROUNDED | **PASS** *(Table 4 ablations)* |
-| **Q08** | Search Module Comparison | Appendix K.2 / Table 6 | SUFFICIENT | GROUNDED | PASS |
-| **Q09** | SVM and LSTM Architectures | Figure 2 Distribution | SUFFICIENT | GROUNDED | PASS |
-| **Q10** | Task 51 Requirement R1 | Figure 3 Task 51 DAG | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(Missing entity 'Task 51')* |
-| **Q11** | Human Evaluator Errors | Section 3.2 / Appendix H | SUFFICIENT | GROUNDED | PASS |
-| **Q12** | Human-as-a-Judge Limitations | Section 4 / 4.4 Constraints | SUFFICIENT | GROUNDED | PASS |
-
-### Benchmark Deliverables
-- **Evaluation Runner Script:** [`evaluate_question_bank.py`](evaluate_question_bank.py) (reproducibly executes the 12-question benchmark)
-
----
-
-## Installation & Setup Guide
-
-### 1. Prerequisites
-- **Python:** 3.10 to 3.13 (Verified on Python 3.13)
-- **Ollama:** Installed and running locally ([ollama.com](https://ollama.com/))
-- **Hardware:** 8GB+ RAM; runs on standard CPU (GPU recommended for faster generation)
-
-### 2. Clone Repository & Setup Virtual Environment
 ```bash
-# Clone the repository
 git clone <REPOSITORY_URL>
 cd enverus-rag-assignment
 
-# Create virtual environment
 python -m venv .venv
-
-# Activate virtual environment
-# Windows (PowerShell):
-.\.venv\Scripts\Activate.ps1
-# Linux / macOS:
-source .venv/bin/activate
-
-# Install required packages
-pip install --upgrade pip
+source .venv/bin/activate          # Windows: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+
+cp .env.example .env               # Windows: Copy-Item .env.example .env
+
+ollama serve                       # if not already running
+ollama pull qwen2.5:1.5b
+
+python build_index.py              # 44 pages → 134 chunks → chroma_db/
+python test_real_rag.py            # end-to-end sanity run
 ```
 
-### 3. Environment Configuration
-Copy the template `.env.example` to `.env`:
-```bash
-# Windows (PowerShell):
-Copy-Item .env.example .env
-# Linux / macOS:
-cp .env.example .env
+Requires Python 3.10–3.13 (verified on 3.13), Ollama, and 8 GB+ RAM. CPU-only works; a GPU mainly cuts generation latency.
+
+---
+
+## Example Output
+
+```python
+from src.rag_pipeline import get_rag_pipeline
+
+pipeline = get_rag_pipeline(default_top_k=5)
+response = pipeline.answer(
+    "How much time and cost does Agent-as-a-Judge save compared with human experts?"
+)
+
+print(response.answer)
+for s in response.sources:
+    print(f"[{s.rank}] {s.chunk_id} · p.{s.page_number} · {s.section} · {s.score:.4f}")
 ```
-Default configuration values:
+
+```
+<paste your actual run output here>
+
+Sources:
+[1] chunk_p07_02 · p.7 · 4 Agent-as-a-Judge · 0.8412
+[2] chunk_p06_04 · p.6 · 3 Human-as-a-Judge · 0.7903
+...
+```
+
+And when the evidence doesn't support an answer:
+
+```python
+pipeline.answer("What is Requirement R1 of Task 51?")
+# → "The provided evidence is insufficient to answer this question."
+#    Safety layer halted before generation (missing entity: 'Task 51').
+```
+
+---
+
+## Architecture
+
+Offline indexing is decoupled from online retrieval — the PDF is processed once, then only the query is embedded per request.
+
+```
+OFFLINE                                    ONLINE
+─────────────────────────────              ─────────────────────────────
+agent_as_a_judge.pdf (44 pp)               User query
+        │                                          │
+  PyMuPDF page extraction                   Query embedding (384-dim)
+  (src/ingest.py)                           (src/embeddings.py)
+        │                                          │
+  Structure-aware chunking  ──▶ 134                │
+  (src/chunking.py)              chunks            │
+        │                                          │
+  Dense embeddings                                 │
+  (src/embeddings.py)                              │
+        │                                          │
+        ▼                                          │
+   ChromaDB  ◀────── cosine / HNSW top-k ──────────┘
+   collection: agent_as_a_judge
+   (src/vector_store.py)
+        │
+        ▼
+   Top-5 evidence chunks (src/retriever.py)
+        │
+        ▼
+   ┌───────────────────────────────────────┐
+   │  PRE-GENERATION SAFETY (src/safety.py)│
+   │   · entity sufficiency                │
+   │   · table-context disambiguation      │
+   │   · setting conflation                │
+   └───────────────────────────────────────┘
+        │                        │
+   insufficient            sufficient
+        │                        ▼
+        │              Qwen 2.5 1.5B via Ollama
+        │              (src/generator.py, temp 0.0)
+        │                        │
+        │                        ▼
+        │              ┌──────────────────────────┐
+        │              │ POST-GENERATION SAFETY   │
+        │              │  · numerical audit       │
+        │              └──────────────────────────┘
+        │                        │
+        ▼                        ▼
+   Canonical abstention   Grounded answer + citations
+```
+
+A standalone diagram is in [`visualization/rag_workflow.png`](visualization/rag_workflow.png).
+
+---
+
+## Pipeline Components
+
+**`src/ingest.py` — PDF ingestion.** Extracts text page-by-page with PyMuPDF into `PageRecord` objects, preserving 1-indexed page boundaries. Handles empty pages, file validation, and page-count verification.
+
+**`src/chunking.py` — Structure-aware chunking.** Rather than fixed-length slicing, chunks respect section hierarchy (`1 Introduction`, `2 DevAI…`, `Appendix A–K`) and keep Markdown table structures intact (Tables 1, 2, 3, 4, 6). Target ~1000 chars, max ~1200, overlap ~150. Chunk IDs are deterministic: `chunk_p{page}_{index}`.
+
+*Why this matters:* several benchmark questions depend on table values. If a table is split mid-row, retrieval can return `$0.12` with no indication of what it measures — a grounding failure the LLM cannot recover from.
+
+**`src/embeddings.py` — Dense embeddings.** `all-MiniLM-L6-v2` maps text to 384-dim vectors with unit-length L2 normalization, so inner product equals cosine similarity. Batched for indexing.
+
+**`src/vector_store.py` — ChromaDB.** Persistent local store at `chroma_db/`, collection `agent_as_a_judge`, `{"hnsw:space": "cosine"}`. Upserts are idempotent, so re-indexing doesn't duplicate entries.
+
+**`src/retriever.py` — Dense retrieval.** Validates the query, embeds it, runs HNSW nearest-neighbor search, converts distance to similarity (`s = 1.0 − distance`), and returns `RetrievalResult` objects carrying rank, chunk ID, page, section, text, and score. Top-5 by default — one chunk often holds a metric while another holds its definition or evaluation setting.
+
+**`src/generator.py` — Local generation.** Calls the Ollama daemon at `http://localhost:11434/api/generate` with `qwen2.5:1.5b` at `temperature=0.0`. The system prompt enforces a 10-point contract forbidding extrapolation, outside knowledge, and unsupported figures.
+
+---
+
+## The Safety Layer
+
+`src/safety.py` runs deterministic checks — no model calls, no probabilistic judgement — on both sides of generation.
+
+**Entity sufficiency (pre-gen).** If a query names a specific identifier (`Task 51`, `Requirement R1`) that does not appear in the retrieved evidence, generation is halted at 0.0s latency and the canonical fallback is returned:
+
+> *"The provided evidence is insufficient to answer this question."*
+
+This blocks the most common RAG failure mode: retrieval misses the target, the model recognises something adjacent, and produces a fluent wrong answer.
+
+**Table-context disambiguation (pre-gen).** Detects queries asking generically for "results" or "metrics" when retrieved chunks span tables with different semantics — Table 2 (developer baselines) vs Table 3 (AI Judge evaluations). Prevents metric substitution across tables.
+
+**Setting conflation (pre-gen).** Detects evidence presenting numbers under multiple evaluation settings (`gray-box`, `black-box`) without 1:1 attribution. Without this, an answer can state a figure without saying which setting it belongs to — technically present in the source, factually misleading.
+
+**Numerical audit (post-gen).** Extracts every number and percentage from the generated answer and verifies each is explicitly supported by the retrieved text. Unsupported figures block the response. Research papers are dense with costs, percentages, and benchmark values, and a 1.5B model is exactly the size where those get transposed.
+
+---
+
+## Benchmark Results
+
+All 12 assignment questions run through the live pipeline via `evaluate_question_bank.py`.
+
+**Three of these questions are designed to be unanswerable from the retrieved evidence.** For Q05, Q06, and Q10, `TRIGGERED` is the correct outcome — the system declining to guess, not the system failing.
+
+| ID | Query Concept | Target Context | Evidence | Grounding | Safety |
+| :-: | :--- | :--- | :---: | :---: | :--- |
+| Q01 | DevAI dataset statistics | DevAI baseline | SUFFICIENT | GROUNDED | PASS |
+| Q02 | Agent-as-a-Judge savings | Human vs Agent-as-a-Judge | SUFFICIENT | GROUNDED | PASS |
+| Q03 | Three agentic frameworks | AI developer baselines | SUFFICIENT | GROUNDED | PASS |
+| Q04 | Average cost & time | Table 1 | SUFFICIENT | GROUNDED | PASS *(Table 1 resolved)* |
+| Q05 | Requirements met & solve rate | Table 2 vs Table 3 | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(Table 2 absent, Table 3 blocked)* |
+| Q06 | OpenHands black-box alignment | Table 3 | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(conflated settings)* |
+| Q07 | Component ablations | Table 4 / §4.3 | SUFFICIENT | GROUNDED | PASS |
+| Q08 | Search module comparison | Appendix K.2 / Table 6 | SUFFICIENT | GROUNDED | PASS |
+| Q09 | SVM and LSTM architectures | Figure 2 | SUFFICIENT | GROUNDED | PASS |
+| Q10 | Task 51 Requirement R1 | Figure 3 DAG | INSUFFICIENT_OR_AMBIGUOUS | GROUNDED | **TRIGGERED** *(missing entity 'Task 51')* |
+| Q11 | Human evaluator errors | §3.2 / Appendix H | SUFFICIENT | GROUNDED | PASS |
+| Q12 | Human-as-a-Judge limitations | §4 / §4.4 | SUFFICIENT | GROUNDED | PASS |
+
+Zero ungrounded answers across all 12.
+
+---
+
+## Retrieval Evaluation
+
+`eval_retrieval.py` measures whether the gold chunk appears in the retrieved set, writing results to `retrieval_evaluation_results.json`.
+
+| Metric | Result |
+| :--- | :---: |
+| Top-1 | 50.0% |
+| Top-3 | 75.0% |
+| Top-5 | 83.3% |
+
+**Read these as directional, not as a performance claim.** The evaluation set is the 12 benchmark queries, so each question moves the number by ~8 points and confidence intervals are wide. They are reported to show the retrieval layer is measured rather than assumed, and to justify the Top-5 default: Top-1 alone would miss half the gold chunks.
+
+---
+
+## Reproduction
+
+```bash
+python build_index.py               # rebuild vector store
+python -m pytest -q                 # 98 passed in ~35s
+python test_real_rag.py             # end-to-end representative queries
+python evaluate_question_bank.py    # 12-question benchmark
+python eval_retrieval.py            # retrieval metrics
+```
+
+Configuration lives in `.env`:
+
 ```ini
-# Vector Store
 CHROMA_PERSIST_DIR=chroma_db
 CHROMA_COLLECTION_NAME=agent_as_a_judge
-
-# Embeddings
 EMBEDDING_MODEL_NAME=all-MiniLM-L6-v2
-
-# Ollama LLM
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:1.5b
 OLLAMA_TEMPERATURE=0.0
 OLLAMA_TIMEOUT=60.0
 ```
 
-### 4. Setup Local Ollama Model
-```bash
-# Start Ollama service (if not already running as a daemon)
-ollama serve
+---
 
-# Pull the Qwen 2.5 1.5B model
-ollama pull qwen2.5:1.5b
+## Repository Structure
 
-# Verify availability
-ollama list
+```
+enverus-rag-assignment/
+├── data/agent_as_a_judge.pdf
+├── src/
+│   ├── ingest.py            # PyMuPDF page extraction
+│   ├── chunking.py          # structure-aware chunking
+│   ├── embeddings.py        # all-MiniLM-L6-v2
+│   ├── vector_store.py      # ChromaDB
+│   ├── retriever.py         # dense retrieval
+│   ├── safety.py            # deterministic guardrails
+│   ├── generator.py         # Ollama / Qwen 2.5 1.5B
+│   └── rag_pipeline.py      # orchestration
+├── tests/                   # 98 pytest cases
+├── visualization/
+│   ├── rag_workflow.png
+│   └── README.md
+├── build_index.py
+├── evaluate_question_bank.py
+├── eval_retrieval.py
+├── test_real_rag.py
+├── test_real_ollama.py
+├── retrieval_evaluation_results.json
+├── rag_e2e_results.json
+├── requirements.txt
+└── .env.example
 ```
 
 ---
 
-## Execution & Reproduction Instructions
+## Design Decisions
 
-### Step 1: Ingest PDF & Build ChromaDB Vector Store
-If starting fresh or rebuilding the vector database:
-```bash
-python build_index.py
-```
-*Output: Extracts 44 pages from `data/agent_as_a_judge.pdf`, chunks into 134 records, embeds with `all-MiniLM-L6-v2`, and populates `chroma_db/`.*
+**No orchestration framework.** The assignment turns on retrieval quality, grounding, and safety — all of which I needed to control explicitly. LangChain or LlamaIndex would have added abstraction between me and the exact logic being evaluated, with no capability I was missing.
 
-### Step 2: Run Automated Tests
-Execute the comprehensive 98-test pytest suite:
-```bash
-python -m pytest -q
-```
-*Expected result:* **`98 passed in ~35s`**
+**A 1.5B local model.** Qwen 2.5 1.5B runs on commodity hardware with no API dependency, which makes the whole system reproducible on a reviewer's laptop. The tradeoff is weaker reasoning — which is precisely why the safety layer is deterministic rather than model-based. The guardrails do not inherit the generator's weaknesses.
 
-### Step 3: Run Interactive / Programmatic RAG Queries
-Run the end-to-end RAG verification script:
-```bash
-python test_real_rag.py
-```
-Or use the Python API directly:
-```python
-from src.rag_pipeline import get_rag_pipeline
+**Temperature 0.0.** Factual QA over a fixed corpus has no use for sampling diversity. Determinism also makes the benchmark reproducible run-to-run.
 
-pipeline = get_rag_pipeline(default_top_k=5)
-response = pipeline.answer("How much time and cost does Agent-as-a-Judge save compared with human experts?")
-
-print("Answer:\n", response.answer)
-print("\nSources:")
-for src in response.sources:
-    print(f" - [{src.rank}] {src.chunk_id} (Page {src.page_number}, {src.section}) - Score: {src.score:.4f}")
-```
-
-### Step 4: Reproduce 12-Question Benchmark Evaluation
-Re-execute all 12 authoritative questions through the live pipeline:
-```bash
-python evaluate_question_bank.py
-```
-*Output: Evaluates all 12 benchmark questions against the local ChromaDB index and Ollama model.*
-
-### Step 5: Reproduce Retrieval Evaluation Audit
-Evaluate retrieval accuracy metrics across the 12 queries:
-```bash
-python eval_retrieval.py
-```
-*Output: Computes Top-1 (50.0%), Top-3 (75.0%), and Top-5 (83.3%) retrieval success rates in `retrieval_evaluation_results.json`.*
+**No UI.** The deliverable is the pipeline and its evaluation. Interfaces are the Python API (`get_rag_pipeline()`), the CLI runner (`test_real_rag.py`), and the benchmark runner (`evaluate_question_bank.py`).
 
 ---
 
 ## Known Limitations
-1. **Single-Paper Corpus:** Tailored specifically to academic paper ingestion for *Agent-as-a-Judge*. Multi-document retrieval across heterogeneous domains would benefit from hierarchical document-level routing.
-2. **Dense Vector Search:** Uses dense semantic retrieval (`all-MiniLM-L6-v2`) without a sparse BM25 hybrid fusion layer. While achieving 83.3% Top-5 recall across benchmark questions, hybrid BM25 + dense ranking could further improve retrieval for rare alphanumeric tokens.
-3. **Conservative Safety Guardrails:** The safety layer intentionally prioritizes factual grounding over conversational flexibility. Queries retrieving ambiguous or conflated multi-setting evidence return canonical insufficiency rather than attempting ungrounded approximations.
-4. **Local CPU Inference Latency:** On standard multi-core CPUs, local Qwen 1.5B generation takes 8–15 seconds for single-paragraph responses and up to ~40 seconds for complex multi-point answers. Hardware acceleration (NVIDIA CUDA or Apple Silicon MPS) significantly reduces generation latency.
+
+1. **Dense-only retrieval.** No BM25 sparse fusion. Rare alphanumeric tokens (`Task 51`, `R1`, specific table labels) are exactly where lexical matching outperforms embeddings, and exactly where Top-1 currently misses. Hybrid BM25 + dense ranking is the highest-value next change.
+2. **Single-paper corpus.** Chunking heuristics are tuned to one academic paper. Multi-document retrieval would need document-level routing before chunk-level search.
+3. **Conservative guardrails.** The safety layer prefers abstention over approximation. A larger model with looser checks would answer more questions — some of them wrongly. This tradeoff is intentional, but it is a tradeoff.
+4. **CPU inference latency.** 8–15s for single-paragraph answers, up to ~40s for multi-point responses. CUDA or Apple Silicon MPS reduces this substantially.
 
 ---
 
-## Deliverables Summary
-- **Source Code:** [`src/`](src/)
-- **Test Suite:** [`tests/`](tests/)
-- **Workflow Visualization:** [`visualization/rag_workflow.png`](visualization/rag_workflow.png) & [`visualization/README.md`](visualization/README.md)
-- **Retrieval Evaluation Results:** [`retrieval_evaluation_results.json`](retrieval_evaluation_results.json)
+## Source
+
+Zhuge, M., Liu, C., Liu, H., You, J., et al. *Agent-as-a-Judge: Evaluate Agents with Agents*, October 2024. [arXiv:2410.10934](https://arxiv.org/abs/2410.10934)
