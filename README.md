@@ -272,4 +272,4 @@ python eval_retrieval.py
 - **Workflow Visualization:** [`visualization/rag_workflow.png`](visualization/rag_workflow.png) & [`visualization/README.md`](visualization/README.md)
 - **Benchmark JSON Results:** [`assignment_question_bank_results.json`](assignment_question_bank_results.json)
 - **Benchmark Markdown Report:** [`assignment_question_bank_answers.md`](assignment_question_bank_answers.md)
-- **Final Submission Checklist:** [`docs/final_submission_checklist.md`](docs/final_submission_checklist.md)
+- **Retrieval Evaluation Results:** [`retrieval_evaluation_results.json`](retrieval_evaluation_results.json)
