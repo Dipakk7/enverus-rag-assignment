@@ -1,0 +1,15 @@
+# Core environment & testing dependencies
+python-dotenv>=1.0.0
+pytest>=8.0.0
+
+# Phase 2 PDF ingestion dependency
+PyMuPDF>=1.24.0
+
+# Phase 4 Embedding dependency
+sentence-transformers>=3.0.0
+
+# Phase 5 Vector store dependency
+chromadb>=0.4.0
+
+# Phase 7 Local Ollama HTTP API client
+requests>=2.31.0

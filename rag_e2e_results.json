@@ -1,0 +1,302 @@
+[
+  {
+    "question": "How much time and cost does Agent-as-a-Judge save compared with three human experts?",
+    "answer": "Agent-as-a-Judge saves significantly more time and cost compared with three human experts. Specifically, it took only 118.43 minutes (2.29% of the cost and 2.36% of the time) to evaluate the dataset, whereas the human experts took a self-reported total of 86.5 hours. The cost of evaluating with Agent-as-a-Judge was 30.58 USD, which is significantly lower than the 1297.50 USD cost for three human experts.",
+    "sources": [
+      {
+        "rank": 1,
+        "chunk_id": "chunk_p11_002",
+        "page_number": 11,
+        "section": "4.4 Cost Analysis",
+        "score": 0.8069028854370117,
+        "distance": 0.19309711456298828,
+        "text": "4.4\nCost Analysis\nThe Human-as-a-Judge took the three evaluators a self-reported total of 86.5 hours. With a 15 USD minimum\nwage (assuming this would buy a subject expert in AI), a full evaluation under DevAI would cost around\n1297.50 USD. In comparison, Agent-as-a-Judge cost only 30.58 USD in API calls and took only 118.43\nminutes—2.29% of the cost and 2.36% of the time of Human-as-a-Judge. LLM-as-a-Judge was faster at 10.99\nminutes, but due to the absence of intelligent context selection by the Agent-as-a-Judge’s modules, it still cost\n29.63 USD."
+      },
+      {
+        "rank": 2,
+        "chunk_id": "chunk_p08_003",
+        "page_number": 8,
+        "section": "4 Agent-as-a-Judge: Evaluating Agents with Agents",
+        "score": 0.7211722135543823,
+        "distance": 0.2788277864456177,
+        "text": "4\nAgent-as-a-Judge: Evaluating Agents with Agents\nHuman evaluation, while somewhat reliable, is time-consuming and requires substantial expertise. To address\nthis, we propose the Agent-as-a-Judge framework. If such an agentic system could evaluate like a human, it\nwould reduce the need for human involvement and eliminate the trade-off between thoroughness and effort."
+      },
+      {
+        "rank": 3,
+        "chunk_id": "chunk_p01_002",
+        "page_number": 1,
+        "section": null,
+        "score": 0.7125112414360046,
+        "distance": 0.28748875856399536,
+        "text": "using Agent-as-a-Judge and find it dramatically outperforms LLM-as-a-Judge and is as reliable as\nour human evaluation baseline. Altogether, we believe that Agent-as-a-Judge marks a concrete step\nforward for modern agentic systems—by providing rich and reliable reward signals necessary for\ndynamic and scalable self-improvement.\nDate: October 18, 2024\nCorrespondence: mingchen.zhuge@kaust.edu.sa, cszhao@meta.com\nDataset: https://huggingface.co/devai-benchmark\nProject: https://github.com/metauto-ai/agent-as-a-judge\nNote: First four authors made core contributions. KAUST crafted the dataset.\nWork done while Mingchen was interning at Meta, with Changsheng leading."
+      },
+      {
+        "rank": 4,
+        "chunk_id": "chunk_p10_003",
+        "page_number": 10,
+        "section": "4.2 Judging Agent-as-a-Judge and LLM-as-a-Judge",
+        "score": 0.702107310295105,
+        "distance": 0.297892689704895,
+        "text": "For\nexample, when evaluating OpenHands, Agent-as-a-\nJudge reaches 92.07% and 90.44%, surpassing LLM-\nas-a-Judge’s 70.76% and 60.38% in both gray-box\nand black-box settings. This shows that Agent-as-a-\nJudge produces more accurate and human-aligned\nevaluations, especially in complex scenarios.\nPR Curves\nJudging developer agents is a class-\nimbalanced task, where meeting requirements is\nmuch rarer than failing. Metrics like judge shift\nand alignment rate can be misleading. For example,\nsince MetaGPT rarely meets requirements, LLM-as-a-Judge easily identifies most cases as negative (achieving\n84.15% in the black-box setting). PR Curves offer a clearer performance measure by balancing precision and\nrecall. Agent-as-a-Judge even outperforms any single human evaluator on OpenHands and aligns closest with\nmajority voting. This shows that, in some cases, Agent-as-a-Judge can nearly replace human evaluators."
+      },
+      {
+        "rank": 5,
+        "chunk_id": "chunk_p10_002",
+        "page_number": 10,
+        "section": "4.2 Judging Agent-as-a-Judge and LLM-as-a-Judge",
+        "score": 0.6770230531692505,
+        "distance": 0.3229769468307495,
+        "text": "4.2\nJudging Agent-as-a-Judge and LLM-as-a-Judge\nJudge Shift\nJudge Shift measures deviation from the Human-as-a-Judge consensus results, with lower values\nindicating a closer alignment. As shown in table 3, Agent-as-a-Judge consistently outperforms LLM-as-a-Judge\nacross tasks, particularly those with task dependencies. For example, in Requirement (I), Agent-as-a-Judge\nshows a Judge Shift as low as 0.27%, while LLM-as-a-Judge reaches 31.24% for OpenHands. This underscores\nAgent-as-a-Judge’s stability and suitability for meeting task requirements. Furthermore, in the gray-box\nsetting, both Agent-as-a-Judge and LLM-as-a-Judge show even better results than their performance in the\nblack-box setting.\nFigure 7 PR Curves comparing judge Methods.\nAlignment Rate\nThe Alignment Rate reflects how\nclosely the AI Judges’ evaluations align with human\nconsensus across all 365 requirements. It is defined\nas the percentage of requirement evaluations that\nare the same as the Human-as-a-Judge consensus\nevaluation. Compared to LLM-as-a-Judge, Agent-\nas-a-Judge consistently achieves a higher Alignment\nRate, closely matching human judgments."
+      }
+    ],
+    "model": "qwen2.5:1.5b",
+    "top_k": 5,
+    "latency": 8.141728000002331,
+    "safety_triggered": false,
+    "safety_reason": null,
+    "evidence_sufficient": "YES",
+    "answer_grounded": "YES",
+    "numerical_accuracy": "Explicitly Supported",
+    "source_traceable": "YES (All 5 chunks preserved with page, score, section)"
+  },
+  {
+    "question": "What are the three open-source agentic frameworks evaluated in DevAI?",
+    "answer": "The three open-source agentic frameworks evaluated in DevAI are:\n\n1. MetaGPT\n2. GPT-Pilot\n3. OpenHands",
+    "sources": [
+      {
+        "rank": 1,
+        "chunk_id": "chunk_p04_005",
+        "page_number": 4,
+        "section": "2.3 Preliminary Benchmark",
+        "score": 0.6109172701835632,
+        "distance": 0.38908272981643677,
+        "text": "2.3\nPreliminary Benchmark\nWe first conduct experiments to collect development outcomes from different frameworks, which serve as\nbaselines in the DevAI dataset. We test three of the most popular open-source frameworks (which we\n4"
+      },
+      {
+        "rank": 2,
+        "chunk_id": "chunk_p18_001",
+        "page_number": 18,
+        "section": "Appendix A: Outline of this Paper",
+        "score": 0.5826023817062378,
+        "distance": 0.4173976182937622,
+        "text": "A\nOutline of this Paper\nPaper: Agent-as-a-Judge: Evaluating Agents with Agents\nKey Logic\n■Step 1: Concept Proposal\nDescription: We propose the Agent-as-a-Judge concept, an extension of the LLM-as-a-Judge\nframework, aimed at evaluating agentic systems using other agentic systems.\n■Step 2: Dataset Creation\nDescription: To address the lack of suitable datasets for evaluating agentic systems in automated\nAI development, we introduce DevAI, a new dataset consisting of 55 realistic AI code generation\ntasks. This also serves as a testbed for the Agent-as-a-Judge proof-of-concept.\n■Step 3: Baseline Evaluation of Developer Agents (Experiment Level 1)\nDescription: In the first level of experiments, we select three popular open-source developer\nagents: MetaGPT, GPT-Pilot, and OpenHands. These agents are evaluated on the DevAI tasks\nto establish performance baselines.\n■Step 4: Conducting Human-as-a-Judge Evaluation\nDescription: We conduct a Human-as-a-Judge experiment, where three human experts assess\nthe performance of the developer agents on the same DevAI tasks.\n■Step 5: Human-as-a-Judge Analysis (Experiment Level 2)"
+      },
+      {
+        "rank": 3,
+        "chunk_id": "chunk_p03_002",
+        "page_number": 3,
+        "section": "2 DevAI: A Dataset for Automated AI Development",
+        "score": 0.5816888213157654,
+        "distance": 0.4183111786842346,
+        "text": "2\nDevAI: A Dataset for Automated AI Development\nIn this section, we introduce our new DevAI benchmark. We then evaluate three state-of-the-art code-\ngenerating agentic systems on this benchmark in Section 3 and present their basic statistics."
+      },
+      {
+        "rank": 4,
+        "chunk_id": "chunk_p02_006",
+        "page_number": 2,
+        "section": "1 Introduction",
+        "score": 0.5803750157356262,
+        "distance": 0.4196249842643738,
+        "text": "To address the aforementioned issues with the current benchmarks in code generation, we introduce DevAI:\nthe AI Developer Dataset, which contains 55 real-world comprehensive AI app development tasks created\nby expert annotators. We apply three leading open-source code-generating agentic frameworks to the tasks\nin DevAI: MetaGPT (Hong et al., 2024b), GPT-Pilot (Pythagora.io, 2023), and OpenHands (Wang et al.,\n2024d). We evaluate their performance using human judges (a painstaking process), LLM-as-a-Judge (Zheng\net al., 2024), and our Agent-as-a-Judge framework."
+      },
+      {
+        "rank": 5,
+        "chunk_id": "chunk_p03_001",
+        "page_number": 3,
+        "section": "1 Introduction",
+        "score": 0.5642703771591187,
+        "distance": 0.43572962284088135,
+        "text": "In addition, considering the evaluation cost, Agent-as-a-Judge saves 97.72% of the time and 97.64% of the\ncost compared to involving three human experts.\nIn summary, the principal contributions of this work are:\n• We release the DevAI dataset, which consists of 55 comprehensive AI development tasks with accompanying\ntags, individual hierarchical requirements, and individual preferences.\n• We benchmark three top open-source code generation agentic frameworks in DevAI, providing a more\ncomprehensive analysis than previous evaluations of them.\n• We introduce the general Agent-as-a-Judge concept, allowing agentic systems a fair and rich evaluation\nwithout the traditional costs associated with human involvement.\n• We demonstrate that an Agent-as-a-Judge outperforms an LLM-as-a-Judge and performs comparably to\nhuman evaluators in our proof-of-concept.\nTips: We provide a paper outline and the experimental design in Appendices A and B."
+      }
+    ],
+    "model": "qwen2.5:1.5b",
+    "top_k": 5,
+    "latency": 3.6314230999996653,
+    "safety_triggered": false,
+    "safety_reason": null,
+    "evidence_sufficient": "YES",
+    "answer_grounded": "YES",
+    "numerical_accuracy": "Explicitly Supported",
+    "source_traceable": "YES (All 5 chunks preserved with page, score, section)"
+  },
+  {
+    "question": "What is the OpenHands black-box alignment rate?",
+    "answer": "The provided evidence is insufficient to answer this question.",
+    "sources": [
+      {
+        "rank": 1,
+        "chunk_id": "chunk_p10_003",
+        "page_number": 10,
+        "section": "4.2 Judging Agent-as-a-Judge and LLM-as-a-Judge",
+        "score": 0.40787792205810547,
+        "distance": 0.5921220779418945,
+        "text": "For\nexample, when evaluating OpenHands, Agent-as-a-\nJudge reaches 92.07% and 90.44%, surpassing LLM-\nas-a-Judge’s 70.76% and 60.38% in both gray-box\nand black-box settings. This shows that Agent-as-a-\nJudge produces more accurate and human-aligned\nevaluations, especially in complex scenarios.\nPR Curves\nJudging developer agents is a class-\nimbalanced task, where meeting requirements is\nmuch rarer than failing. Metrics like judge shift\nand alignment rate can be misleading. For example,\nsince MetaGPT rarely meets requirements, LLM-as-a-Judge easily identifies most cases as negative (achieving\n84.15% in the black-box setting). PR Curves offer a clearer performance measure by balancing precision and\nrecall. Agent-as-a-Judge even outperforms any single human evaluator on OpenHands and aligns closest with\nmajority voting. This shows that, in some cases, Agent-as-a-Judge can nearly replace human evaluators."
+      },
+      {
+        "rank": 2,
+        "chunk_id": "chunk_p10_002",
+        "page_number": 10,
+        "section": "4.2 Judging Agent-as-a-Judge and LLM-as-a-Judge",
+        "score": 0.3921698331832886,
+        "distance": 0.6078301668167114,
+        "text": "4.2\nJudging Agent-as-a-Judge and LLM-as-a-Judge\nJudge Shift\nJudge Shift measures deviation from the Human-as-a-Judge consensus results, with lower values\nindicating a closer alignment. As shown in table 3, Agent-as-a-Judge consistently outperforms LLM-as-a-Judge\nacross tasks, particularly those with task dependencies. For example, in Requirement (I), Agent-as-a-Judge\nshows a Judge Shift as low as 0.27%, while LLM-as-a-Judge reaches 31.24% for OpenHands. This underscores\nAgent-as-a-Judge’s stability and suitability for meeting task requirements. Furthermore, in the gray-box\nsetting, both Agent-as-a-Judge and LLM-as-a-Judge show even better results than their performance in the\nblack-box setting.\nFigure 7 PR Curves comparing judge Methods.\nAlignment Rate\nThe Alignment Rate reflects how\nclosely the AI Judges’ evaluations align with human\nconsensus across all 365 requirements. It is defined\nas the percentage of requirement evaluations that\nare the same as the Human-as-a-Judge consensus\nevaluation. Compared to LLM-as-a-Judge, Agent-\nas-a-Judge consistently achieves a higher Alignment\nRate, closely matching human judgments."
+      },
+      {
+        "rank": 3,
+        "chunk_id": "chunk_p09_001",
+        "page_number": 9,
+        "section": "4.1 Proof-of-Concept",
+        "score": 0.3655334711074829,
+        "distance": 0.6344665288925171,
+        "text": "Table 3 AI Judges and Their Shift/Alignment with Human-as-a-Judge. We compare the results of LLM-as-a-Judge\nand Agent-as-a-Judge with Human-as-a-Judge. (I) represents performance on independent tasks, while (D) represents\nperformance considering task dependencies. Note:\ngray-box settings use carefully manually collected trajectory\ndata (which is nearly inaccessible in practical situations, see Appendix J). In contrast,\nblack-box setting doesn’t\nneed to access to such data. The red scores represent the absolute judge shift compared with Human-as-a-Judge (e.g.,\n2.74%)."
+      },
+      {
+        "rank": 4,
+        "chunk_id": "chunk_p21_003",
+        "page_number": 21,
+        "section": "Appendix D: Extend Related Work",
+        "score": 0.35113275051116943,
+        "distance": 0.6488672494888306,
+        "text": "et al., 2024; Huang et al., 2023). Among these, open-sourced frameworks like OpenHands (Wang et al., 2024d)\nhave gained popularity due to their strong user experience. Moreover, scientific discovery (Jansen et al., 2024;\nLu et al., 2024a) and ML agents (Yang et al., 2024b) are also receiving increased attention."
+      },
+      {
+        "rank": 5,
+        "chunk_id": "chunk_p10_004",
+        "page_number": 10,
+        "section": "4.3 Ablations For Agent-as-a-Judge",
+        "score": 0.3408125638961792,
+        "distance": 0.6591874361038208,
+        "text": "4.3\nAblations For Agent-as-a-Judge\nWe conduct ablations to evaluate the impact of adding different components on Agent-as-a-Judge’s performance.\nThe components analyzed include ask, graph, read, locate, and retrieve. The component ablation study\nfor Agent-as-a-Judge reveals key insights into the performance gains from adding specific functionalities.\nTable 4 Component Ablation Studies for Agent-as-a-Judge. We\nanalyze the impact of adding various components (ask, graph,\nread, locate, and retrieve) on the performance of Agent-as-a-\nJudge for judging OpenHands.\nMetric\n+ ask + graph + read + locate + retrieve\nAgent-as-a-Judge Performance\nAlignment Rate 65.03% 75.95% 82.24%\n90.44%\n90.16%\nWith only the ask component, the agent\nachieves a 65.03% alignment rate. Adding\nthe graph component increases performance\nto 75.95%, as the agent can better understand\nthe relationships between files.\nThe introduction of read further improves\nthe alignment rate to 82.24%, reflecting the\nvalue of direct access to the contents of the\nfile. Incorporating locate brings a substantial boost to 90.44%, as the agent can efficiently target files relevant\n10"
+      }
+    ],
+    "model": "qwen2.5:1.5b",
+    "top_k": 5,
+    "latency": 3.0436406999942847,
+    "safety_triggered": true,
+    "safety_reason": "Query asks generally for results without specifying a table, but retrieved evidence spans multiple distinct tables (['3', '4']) with divergent evaluation contexts.",
+    "evidence_sufficient": "NO (Ambiguous / Missing Entity)",
+    "answer_grounded": "YES",
+    "numerical_accuracy": "N/A (Canonical insufficiency returned)",
+    "source_traceable": "YES (All 5 chunks preserved with page, score, section)"
+  },
+  {
+    "question": "What are the Requirements Met and Task Solve Rate results?",
+    "answer": "The provided evidence is insufficient to answer this question.",
+    "sources": [
+      {
+        "rank": 1,
+        "chunk_id": "chunk_p07_002",
+        "page_number": 7,
+        "section": "3.1 Benchmark Baselines by Human-as-a-Judge",
+        "score": 0.5760632157325745,
+        "distance": 0.42393678426742554,
+        "text": "Performance Analysis\nThe results of this experiment are shown in Table 2. We found that the two best-\nperforming methods (GPT-Pilot and OpenHands) could satisfy about 29% of the requirements (or around\n44% if prerequisites are ignored) but only on one task could they meet all the requirements. This highlights\nthat DevAI offers a considerable but appropriate level of challenge for current and future methods. Moreover,\nthe fulfillment of intermediate requirements aligns with our expectations, as discussed in Section 2, that\nDevAI provides richer feedback by uncovering how agentic systems falter during the process instead of just\nfocusing on a single performance metric at the end."
+      },
+      {
+        "rank": 2,
+        "chunk_id": "chunk_p04_004",
+        "page_number": 4,
+        "section": "2.2 The DevAI Dataset",
+        "score": 0.5705173015594482,
+        "distance": 0.42948269844055176,
+        "text": "The requirements belonging to each task represent a milestone in the comprehensive development process and\nare arranged as a directed acyclic graph (similar to the work by He et al. (2021)), with requirements such\nas visualizing results depending on correct data loading and modeling. This allows for more comprehensive\nnon-sparse feedback than a binary success metric. Furthermore, the inclusion of hierarchical requirements\nmakes simple memorization an inadequate solution strategy, as completing the entire task requires agentic\ncapabilities rather than relying solely on symbolic memorization, as is typical in foundation models."
+      },
+      {
+        "rank": 3,
+        "chunk_id": "chunk_p09_002",
+        "page_number": 9,
+        "section": "4.1 Proof-of-Concept",
+        "score": 0.5357381105422974,
+        "distance": 0.46426188945770264,
+        "text": "Table 3 (continued): AI Judges and Their Shift/Alignment with Human-as-a-Judge\nMetric\nMetaGPT (Hong et al., 2024b) GPT-Pilot (Pythagora.io, 2023) OpenHands (Wang et al., 2024d)\nLLM-as-a-Judge\n(a) Requirements Met (I)\n19.39% (2.74%)\n12.56% (32.24%)\n11.47% (31.42%)\n(b) Requirements Met (D)\n1.63% (4.92%)\n4.09% (24.87%)\n2.18% (26.50%)\n(c) Task Solve Rate\n0.0% (0.0%)\n0.0% (1.81%)\n0.0% (1.81%)\nAlignment Rate ↑\n84.15%\n65.30%\n60.38%\nAgent-as-a-Judge\n(I) Requirements Met (I)\n25.40% (3.26%)\n53.00% (8.20%)\n42.62% (0.27%)\n(II) Requirements Met (D)\n5.73% (0.81%)\n39.89% (10.93%)\n26.50% (2.17%)\n(III) Task Solve Rate\n0.0% (0.0%)\n5.45% (3.64%)\n1.81% (0.00%)\nAlignment Rate ↑\n88.52%\n83.88%\n90.44%\nLLM-as-a-Judge\n(a) Requirements Met (I)\n28.68% (6.55%)\n38.79% (4.10%)\n43.16% (0.27%)\n(b) Requirements Met (D)\n17.75% (11.20%)\n33.06% (4.10%)\n32.24% (3.56%)\n(c) Task Solve Rate\n1.81% (1.81%)\n3.63% (1.82%)\n7.27% (5.46%)\nAlignment Rate ↑\n68.86%\n71.85%\n70.76%\nAgent-as-a-Judge\n(I) Requirements Met (I)\n23.49% (1.35%)\n46.44% (1.64%)\n43.44% (0.54%)\n(II) Requirements Met (D)\n6.01% (0.54%)\n30.60% (1.64%)\n28.14% (0.53%)\n(III) Task Solve Rate\n0.0% (0.00%)\n5.45% (3.64%)\n3.63% (1.82%)\nAlignment Rate ↑\n92.07%\n86.61%\n90.16%\n/\nHuman-as-a-Judge\nAlignment Rate (38bb)\n92.63%\n90.98%\n89.89%"
+      },
+      {
+        "rank": 4,
+        "chunk_id": "chunk_p03_004",
+        "page_number": 3,
+        "section": "2.1 Motivation",
+        "score": 0.4941394329071045,
+        "distance": 0.5058605670928955,
+        "text": "Topic\nWe chose automated AI development as our main topic. While AI and ML tasks are often more\ncomplex, they follow clear, standard procedures. For example, data processing typically comes first in an\nAI pipeline, and performance reporting goes at the end. We believe this topological nature can help better\nmonitor the development process and provide useful signals to the agentic systems.\nGoals\nAn ideal benchmark should address critical issues in automated development by focusing on three key\nfactors. First, it should reflect practical software scenarios, where tasks are often too complex for a single\nLLM, requiring human or agentic systems. Second, it should emphasize the development process, not just\nfinal outcomes (e.g., pass@1 rates offer limited feedback and fail to highlight intermediate problems). Lastly,\nthe evaluation should be computationally cost-effective and efficient, avoiding long training times or excessive\nmanual oversight.\n1https://www.cognition.ai/blog/introducing-devin\n2https://www.cursor.com/\n3"
+      },
+      {
+        "rank": 5,
+        "chunk_id": "chunk_p05_002",
+        "page_number": 5,
+        "section": "2.3 Preliminary Benchmark",
+        "score": 0.4918476939201355,
+        "distance": 0.5081523060798645,
+        "text": "Figure 3 A task example in DevAI. This task is adapted from a real-world demo given at https://www.cognitio\nn.ai/blog/introducing-devin. As this example shows, task requirements in DevAI are structured as a Directed\nAcyclic Graph (DAG), with nodes representing individual requirements and directed edges showing dependencies.\nMore examples are in Appendix G.\nwill refer to as “AI developers”): MetaGPT (Hong et al., 2024b), GPT-Pilot (Pythagora.io, 2023), and\nOpenHands (Wang et al., 2024d)—all selected for their strong community acceptance (each having over 30,000\nstars on GitHub)."
+      }
+    ],
+    "model": "qwen2.5:1.5b",
+    "top_k": 5,
+    "latency": 9.807110200010356,
+    "safety_triggered": true,
+    "safety_reason": "Query asks generally for results without specifying a table, but retrieved evidence spans multiple distinct tables (['2', '3']) with divergent evaluation contexts.",
+    "evidence_sufficient": "NO (Ambiguous / Missing Entity)",
+    "answer_grounded": "YES",
+    "numerical_accuracy": "N/A (Canonical insufficiency returned)",
+    "source_traceable": "YES (All 5 chunks preserved with page, score, section)"
+  },
+  {
+    "question": "What does Task 51 Requirement R1 specify?",
+    "answer": "The provided evidence is insufficient to answer this question.",
+    "sources": [
+      {
+        "rank": 1,
+        "chunk_id": "chunk_p04_004",
+        "page_number": 4,
+        "section": "2.2 The DevAI Dataset",
+        "score": 0.4695224165916443,
+        "distance": 0.5304775834083557,
+        "text": "The requirements belonging to each task represent a milestone in the comprehensive development process and\nare arranged as a directed acyclic graph (similar to the work by He et al. (2021)), with requirements such\nas visualizing results depending on correct data loading and modeling. This allows for more comprehensive\nnon-sparse feedback than a binary success metric. Furthermore, the inclusion of hierarchical requirements\nmakes simple memorization an inadequate solution strategy, as completing the entire task requires agentic\ncapabilities rather than relying solely on symbolic memorization, as is typical in foundation models."
+      },
+      {
+        "rank": 2,
+        "chunk_id": "chunk_p05_002",
+        "page_number": 5,
+        "section": "2.3 Preliminary Benchmark",
+        "score": 0.44291478395462036,
+        "distance": 0.5570852160453796,
+        "text": "Figure 3 A task example in DevAI. This task is adapted from a real-world demo given at https://www.cognitio\nn.ai/blog/introducing-devin. As this example shows, task requirements in DevAI are structured as a Directed\nAcyclic Graph (DAG), with nodes representing individual requirements and directed edges showing dependencies.\nMore examples are in Appendix G.\nwill refer to as “AI developers”): MetaGPT (Hong et al., 2024b), GPT-Pilot (Pythagora.io, 2023), and\nOpenHands (Wang et al., 2024d)—all selected for their strong community acceptance (each having over 30,000\nstars on GitHub)."
+      },
+      {
+        "rank": 3,
+        "chunk_id": "chunk_p23_002",
+        "page_number": 23,
+        "section": "Appendix E: The Procedures of Creating DevAI Dataset",
+        "score": 0.4064024090766907,
+        "distance": 0.5935975909233093,
+        "text": "query. The constraint prompts guide the developer agents to save and execute the source codes, which are in\nline with the real-world development standard. See Appendix I for our constraint prompts.\nE.2\nSet Judging Criteria\nTo make the evaluation of the developer agent precise, we assign to each task query a list of requirements as\ntask milestones. The requirements are chosen so that satisfying all the requirements is a necessary condition to\nconsider the task to be solved successively. Since our tasks are AI-centric, our queries target essential elements\nof AI development, including data processing, AI method, presentation of evaluation metrics, visualization, and\nhuman-computer interaction, covering the key areas that matter most in real-world scenarios. On the other\nhand, breaking down tasks into individual requirements also reflects the multi-step nature of code development.\nImportantly, to avoid ambiguity, we set the requirements to be explicit, binary, and straightforward to evaluate.\nTo include other human predispositions, we include a list of preferences per task that covers subjective,\nambiguous, or non-explicitly stated characteristics."
+      },
+      {
+        "rank": 4,
+        "chunk_id": "chunk_p07_002",
+        "page_number": 7,
+        "section": "3.1 Benchmark Baselines by Human-as-a-Judge",
+        "score": 0.39208316802978516,
+        "distance": 0.6079168319702148,
+        "text": "Performance Analysis\nThe results of this experiment are shown in Table 2. We found that the two best-\nperforming methods (GPT-Pilot and OpenHands) could satisfy about 29% of the requirements (or around\n44% if prerequisites are ignored) but only on one task could they meet all the requirements. This highlights\nthat DevAI offers a considerable but appropriate level of challenge for current and future methods. Moreover,\nthe fulfillment of intermediate requirements aligns with our expectations, as discussed in Section 2, that\nDevAI provides richer feedback by uncovering how agentic systems falter during the process instead of just\nfocusing on a single performance metric at the end."
+      },
+      {
+        "rank": 5,
+        "chunk_id": "chunk_p23_003",
+        "page_number": 23,
+        "section": "Appendix E: The Procedures of Creating DevAI Dataset",
+        "score": 0.3916638493537903,
+        "distance": 0.6083361506462097,
+        "text": "E.3\nBuilding Dependency Among Requirements\nTo enhance the realism of our benchmark, we analyzed the dependencies among requirements. Over the past\ndecades, methodologies such as the KDD Process (Fayyad et al., 1996) and CRISP-DM (Wirth and Hipp,\n2000) have guided ML/AI development, establishing foundational frameworks that have been further refined\nwith the rise of AutoML (He et al., 2021).\nInspired by these methodologies, we identified a seven-step process for automated AI development tasks. This\nprocess includes critical stages such as data preprocessing, feature engineering, model selection, and hyperpa-\nrameter tuning, along with essential post-development activities like metrics recording, report generation, and\nthe development of interactive user applications. This structured approach allows us to evaluate the agent’s\nability to manage task dependencies and effectively navigate complex, real-world scenarios."
+      }
+    ],
+    "model": "qwen2.5:1.5b",
+    "top_k": 5,
+    "latency": 0.0,
+    "safety_triggered": true,
+    "safety_reason": "Required entity identifier 'Task 51' ('51') is not present in retrieved evidence.",
+    "evidence_sufficient": "NO (Ambiguous / Missing Entity)",
+    "answer_grounded": "YES",
+    "numerical_accuracy": "N/A (Canonical insufficiency returned)",
+    "source_traceable": "YES (All 5 chunks preserved with page, score, section)"
+  }
+]
