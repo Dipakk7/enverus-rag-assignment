@@ -272,12 +272,6 @@ enverus-rag-assignment/
 
 ---
 
-## Privacy & Source Material
-
-Private assessment questions, confidential instructions, and other proprietary evaluation material are intentionally not reproduced in this README. The supplied research paper is the sole knowledge source for the pipeline.
-
----
-
 ## Summary
 
 This project demonstrates a complete, locally executable RAG workflow emphasizing reliable document processing, semantic retrieval, source-grounded generation, numerical and table safety, deterministic abstention, and reproducible evaluation.
