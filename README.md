@@ -137,9 +137,7 @@ All 12 assignment questions have been evaluated against the authoritative source
 | **Q12** | Human-as-a-Judge Limitations | Section 4 / 4.4 Constraints | SUFFICIENT | GROUNDED | PASS |
 
 ### Benchmark Deliverables
-- **Machine-Readable JSON Results:** [`assignment_question_bank_results.json`](assignment_question_bank_results.json)
-- **Detailed Markdown Audit Report:** [`assignment_question_bank_answers.md`](assignment_question_bank_answers.md)
-- **Evaluation Runner Script:** [`evaluate_question_bank.py`](evaluate_question_bank.py)
+- **Evaluation Runner Script:** [`evaluate_question_bank.py`](evaluate_question_bank.py) (reproducibly executes the 12-question benchmark)
 
 ---
 
@@ -247,7 +245,7 @@ Re-execute all 12 authoritative questions through the live pipeline:
 ```bash
 python evaluate_question_bank.py
 ```
-*Output: Generates updated `assignment_question_bank_results.json` and `assignment_question_bank_answers.md`.*
+*Output: Evaluates all 12 benchmark questions against the local ChromaDB index and Ollama model.*
 
 ### Step 5: Reproduce Retrieval Evaluation Audit
 Evaluate retrieval accuracy metrics across the 12 queries:
@@ -270,6 +268,4 @@ python eval_retrieval.py
 - **Source Code:** [`src/`](src/)
 - **Test Suite:** [`tests/`](tests/)
 - **Workflow Visualization:** [`visualization/rag_workflow.png`](visualization/rag_workflow.png) & [`visualization/README.md`](visualization/README.md)
-- **Benchmark JSON Results:** [`assignment_question_bank_results.json`](assignment_question_bank_results.json)
-- **Benchmark Markdown Report:** [`assignment_question_bank_answers.md`](assignment_question_bank_answers.md)
 - **Retrieval Evaluation Results:** [`retrieval_evaluation_results.json`](retrieval_evaluation_results.json)
