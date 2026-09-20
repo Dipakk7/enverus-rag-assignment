@@ -6,7 +6,7 @@ This directory contains the visual architectural representation of the end-to-en
 
 ## Complete End-to-End RAG Architecture
 
-![RAG Workflow Diagram](rag_workflow.svg)
+![RAG Workflow Diagram](rag_workflow.png)
 
 ---
 

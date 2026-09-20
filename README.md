@@ -25,9 +25,9 @@ The pipeline enables verifiable, source-grounded question answering over the pap
 
 The pipeline decouples **Offline Document Ingestion & Indexing** from **Online Grounded Retrieval & Generation**:
 
-![RAG System Workflow](visualization/rag_workflow.svg)
+![RAG Architecture](visualization/rag_workflow.png)
 
-*(A standalone SVG architecture diagram is located in [`visualization/rag_workflow.svg`](visualization/rag_workflow.svg) with detailed notes in [`visualization/README.md`](visualization/README.md).)*
+*(A standalone architecture diagram is located in [`visualization/rag_workflow.png`](visualization/rag_workflow.png) with detailed notes in [`visualization/README.md`](visualization/README.md).)*
 
 ```
 [ Research Paper PDF (44 pages) ]
@@ -269,7 +269,7 @@ python eval_retrieval.py
 ## Deliverables Summary
 - **Source Code:** [`src/`](src/)
 - **Test Suite:** [`tests/`](tests/)
-- **Workflow Visualization:** [`visualization/rag_workflow.svg`](visualization/rag_workflow.svg) & [`visualization/README.md`](visualization/README.md)
+- **Workflow Visualization:** [`visualization/rag_workflow.png`](visualization/rag_workflow.png) & [`visualization/README.md`](visualization/README.md)
 - **Benchmark JSON Results:** [`assignment_question_bank_results.json`](assignment_question_bank_results.json)
 - **Benchmark Markdown Report:** [`assignment_question_bank_answers.md`](assignment_question_bank_answers.md)
 - **Final Submission Checklist:** [`docs/final_submission_checklist.md`](docs/final_submission_checklist.md)
