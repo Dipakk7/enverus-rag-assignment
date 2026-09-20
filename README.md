@@ -171,81 +171,35 @@ Machine-readable evaluation artifacts are included in the repository for reprodu
 
 ---
 
-## Installation & Setup
-
-### Clone Repository
+## Setup & Reproduction
 
 ```bash
 git clone https://github.com/Dipakk7/enverus-rag-assignment.git
 cd enverus-rag-assignment
-```
 
-### Create a Virtual Environment
-
-```bash
 python -m venv .venv
-```
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
-Windows:
-```bash
-.venv\Scripts\activate
-```
-
-macOS / Linux:
-```bash
-source .venv/bin/activate
-```
-
-### Install Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### Configure Ollama
-
-Install Ollama and ensure the local service is running, then pull the configured model:
-
+Install [Ollama](https://ollama.com), start the local service, then pull the model:
 ```bash
 ollama pull qwen2.5:1.5b
 ```
 
-### Build the Vector Index
-
+Build the index (extracts the paper, embeds it, populates ChromaDB):
 ```bash
 python build_index.py
 ```
 
-This extracts the research paper, creates embeddings, and stores the resulting vectors in the local ChromaDB index.
-
----
-
-## Reproduction
-
-**Run the test suite**
+Run and verify:
 ```bash
-pytest -q
-```
-Expected result: `99 passed`
-
-**Run retrieval evaluation**
-```bash
-python eval_retrieval.py
-```
-
-**Run end-to-end RAG**
-```bash
-python test_real_rag.py
-```
-
-**Run real Ollama generation test**
-```bash
-python test_real_ollama.py
-```
-
-**Run evaluation benchmark**
-```bash
-python evaluate_question_bank.py
+pytest -q                          # 99 passed
+python eval_retrieval.py           # retrieval accuracy
+python test_real_rag.py            # end-to-end RAG
+python test_real_ollama.py         # local generation check
+python evaluate_question_bank.py   # full benchmark
 ```
 
 ---
@@ -301,21 +255,10 @@ enverus-rag-assignment/
 
 ## Design Decisions
 
-**Local-First Execution**
-
-The core pipeline runs locally: PDF → Embeddings → ChromaDB → Retrieval → Ollama → Grounded Answer. This avoids requiring an external inference API for the core workflow.
-
-**Source-First Generation**
-
-The LLM is not treated as the source of truth. Retrieved document evidence is passed to the generation layer, and the safety layer can return a fallback when the evidence does not adequately support an answer.
-
-**Numerical Integrity**
-
-Numerical and table-based questions receive additional validation because retrieval or generation errors can materially change the meaning of an answer.
-
-**Reproducibility**
-
-The project includes deterministic document processing, reproducible indexing, automated tests, retrieval evaluation, end-to-end evaluation, and machine-readable evaluation artifacts.
+- **Local-first:** the full path — PDF → Embeddings → ChromaDB → Retrieval → Ollama → Grounded Answer — runs locally with no external inference API required.
+- **Source-first generation:** the LLM isn't the source of truth. Retrieved evidence is passed to generation, and the safety layer can return a fallback when that evidence doesn't support an answer.
+- **Numerical integrity:** numerical and table-based questions get extra validation, since a retrieval or generation error there can materially change the meaning of an answer.
+- **Reproducibility:** deterministic document processing, reproducible indexing, automated tests, and machine-readable evaluation artifacts.
 
 ---
 
@@ -331,30 +274,7 @@ The project includes deterministic document processing, reproducible indexing, a
 
 ## Privacy & Source Material
 
-This repository demonstrates the technical implementation and evaluation methodology for the case study.
-
-Private assessment questions, confidential instructions, and other proprietary evaluation material are intentionally not reproduced in this README.
-
-The supplied research paper is used as the knowledge source for the RAG pipeline.
-
----
-
-## Key Files
-
-| File | Purpose |
-| :--- | :--- |
-| `build_index.py` | Builds the document index |
-| `src/ingest.py` | PDF extraction |
-| `src/chunking.py` | Structure-aware chunking |
-| `src/embeddings.py` | Embedding generation |
-| `src/vector_store.py` | ChromaDB persistence |
-| `src/retriever.py` | Dense semantic retrieval |
-| `src/generator.py` | Local Ollama generation |
-| `src/safety.py` | Grounding and safety validation |
-| `src/rag_pipeline.py` | End-to-end RAG orchestration |
-| `eval_retrieval.py` | Retrieval evaluation |
-| `evaluate_question_bank.py` | Automated evaluation |
-| `visualization/rag_workflow.png` | RAG workflow visualization |
+Private assessment questions, confidential instructions, and other proprietary evaluation material are intentionally not reproduced in this README. The supplied research paper is the sole knowledge source for the pipeline.
 
 ---
 
